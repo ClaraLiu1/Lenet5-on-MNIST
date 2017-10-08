@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# 问题：dropout方法？
 import tensorflow as tf
 
 # 定义神经网络相关的参数
-INPUT_NODE = 784
-OUTPUT_NODE = 10
-LAYER1_NODE = 500
+INPUT_NODE = 784 #输入：28 * 28 的图片
+OUTPUT_NODE = 10 #输出：10种数字
+LAYER1_NODE = 500 #
 
 IMAGE_SIZE = 28
 NUM_CHANNELS = 1
@@ -24,10 +25,10 @@ FC_SIZE = 512
 # 定义神经网络的前向传播过程。
 # 这里添加了一个新的参数train，用于区别训练过程和测试过程。
 # 在这个程序中将用到dropout方法，dropout可以进一步提升模型可靠性并防止过拟合，dropout过程只在训练时使用。
+
 def inference(input_tensor, train, regularizer):
-    # 声明第一层神经网络的变量并完成前向传播过程。这个过程和6.3.1小节中介绍的一致。
-    # 通过使用不同的命名空间来隔离不同层的变量，这可以让每一层中的变量命名只需要考虑在当前层的作用，而不需要担心重名的问题。
-    # 和标准LeNet-5模型不大一样，这里定义卷积层的输入为28*28*1的原始MNIST图片像素。
+    # C1
+    # 卷积层的输入为28*28*1的原始MNIST图片像素。
     # 因为卷积层中使用了全0填充，所以输出为28*28*32的矩阵。
     with tf.variable_scope('layer1-conv1'):
         # 这里使用tf.get_variable或tf.Variable没有本质区别，因为在训练或是测试中没有在同一个程序中多次调用这个函数。
@@ -41,12 +42,14 @@ def inference(input_tensor, train, regularizer):
         conv1 = tf.nn.conv2d(input_tensor, conv1_weights, strides=[1, 1, 1, 1], padding='SAME')
         relu1 = tf.nn.relu(tf.nn.bias_add(conv1, conv1_biases))
 
+    # S2
     # 实现第二层池化层的前向传播过程。
     # 这里选用最大池化层，池化层过滤器的边长为2，使用全0填充且移动的步长为2。
     # 这一层的输入是上一层的输出，也就是28*28*32的矩阵。输出为14*14*32的矩阵。
     with tf.name_scope('layer2-pool'):
         pool1 = tf.nn.max_pool(relu1, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
+    # C3
     # 声明第三层卷积层的变量并实现前向传播过程。
     # 这一层的输入为14*14*32的矩阵，输出为14*14*64的矩阵。
     with tf.variable_scope('layer3-conv2'):
@@ -59,6 +62,7 @@ def inference(input_tensor, train, regularizer):
         conv2 = tf.nn.conv2d(pool1, conv2_weights, strides=[1, 1, 1, 1], padding='SAME')
         relu2 = tf.nn.relu(tf.nn.bias_add(conv2, conv2_biases))
 
+    # S4
     # 实现第四层池化层的前向传播过程。
     # 这一层和第二层的结构是一样的。这一层的输入为14*14*64的矩阵，输出为7*7*64的矩阵。
     with tf.name_scope('layer4-poo2'):
